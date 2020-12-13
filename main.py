@@ -21,11 +21,14 @@ def simulate(n, prev_score=0, strategy=strat.choose_all):
 
     if remaining == 0:
         # print(f"no choice, score = {score}")
-        return score + simulate(6, strategy=strategy)
+        score += simulate(6, strategy=strategy)
+        if score < 350:
+            return 0
+        return score
     if remaining == 1:
         # print(f"no choice, score = {score}")
         if score < 350:
-            score = 0
+            return 0
         return score
     if remaining == n:
         # print(f"no luck, score = 0")
