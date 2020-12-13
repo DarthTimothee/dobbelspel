@@ -11,12 +11,10 @@ def simulate(n, prev_score=0, strategy=strat.choose_all):
     dice = [random.randint(1, 6) for _ in range(n)]
     # print(f"{dice}, prev={prev_score}")
 
-    s = three_same(dice)
-    remove_three = dice
-    for a in s:
-        remove_three.remove(a)
-        remove_three.remove(a)
-        remove_three.remove(a)
+    remove_three = dice.copy()
+    for a in three_same(dice):
+        for x in [a]*3:
+            remove_three.remove(x)
 
     remaining = len(remove_three) - remove_three.count(1) - remove_three.count(5)
     score = prev_score + max_score(dice)
