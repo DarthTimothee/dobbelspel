@@ -18,6 +18,9 @@ def simulate(n, prev_score=0, strategy=strat.choose_all):
 
     remaining = len(remove_three) - remove_three.count(1) - remove_three.count(5)
     score = prev_score + max_score(dice)
+    if score < 350:
+        score = 0
+
     if remaining == 0:
         # print(f"no choice, score = {score}")
         return score + simulate(6, strategy=strategy)
@@ -53,9 +56,9 @@ print(f"ALT  = {np.mean(throws_alt)}")
 
 plt.figure()
 plt.xlim(0, 1000)
-plt.hist(throws_all, density=True, bins=50, color="b", alpha=0.5, label="choose all")
-plt.hist(throws_best, density=True, bins=50, color="r", alpha=0.5, label="choose only best")
-plt.hist(throws_alt, density=True, bins=50, color="g", alpha=0.5, label="choose alt")
+plt.hist(throws_all, density=True, bins=100, color="b", alpha=0.5, label="choose all")
+plt.hist(throws_best, density=True, bins=100, color="r", alpha=0.5, label="choose only best")
+plt.hist(throws_alt, density=True, bins=100, color="g", alpha=0.5, label="choose alt")
 
 plt.xlabel("reward")
 plt.ylabel("probability density")

@@ -8,7 +8,11 @@ def three_same(dice):
 
 def max_score(dice):
     score = 0
+    if sorted(dice) == [1, 2, 3, 4, 5, 6]:
+        return 2000
     for a in [1, 2, 3, 4, 5, 6]:
+        if dice.count(a) == 6:
+            return 5000
         if dice.count(a) >= 3:
             [dice.remove(x) for x in [a]*3]
             if a == 1:
