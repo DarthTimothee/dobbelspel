@@ -40,7 +40,7 @@ def simulate(n, prev_score=0, strategy=strat.choose_all):
     return simulate(len(remaining_dice), score, strategy)
 
 
-n = 100000
+n = 1000000
 throws_all = np.zeros(n)
 throws_best = np.zeros(n)
 throws_alt = np.zeros(n)

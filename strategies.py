@@ -18,15 +18,15 @@ def choose_all(dice):
     :return:
     """
     chosen_dice = []
-    remaining_dice = []
+    remaining_dice = dice
     for a in [1, 2, 3, 4, 5, 6]:
         if dice.count(a) >= 3:
             chosen_dice.extend([a] * 3)
+            [remaining_dice.remove(x) for x in [a]*3]
     for die in dice:
         if die == 1 or die == 5:
             chosen_dice.append(die)
-        else:
-            remaining_dice.append(die)
+            remaining_dice.remove(die)
     return chosen_dice, remaining_dice
 
 
@@ -43,7 +43,7 @@ def choose_best(dice):
     for a in [6, 5, 4, 3, 2, 1]:
         if dice.count(a) >= 3:
             chosen_dice.extend([a] * 3)
-            [chosen_dice.remove(x) for x in [a]*3]
+            [remaining_dice.remove(x) for x in [a]*3]
             return chosen_dice, remaining_dice
 
     if 1 in dice:
@@ -72,7 +72,7 @@ def choose_alt(dice):
     for a in [6, 5, 4, 3, 2, 1]:
         if dice.count(a) >= 3:
             chosen_dice.extend([a] * 3)
-            [chosen_dice.remove(x) for x in [a]*3]
+            [remaining_dice.remove(x) for x in [a]*3]
 
     # Choose all 1s
     for _ in range(remaining_dice.count(1)):
