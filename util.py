@@ -26,3 +26,14 @@ def remove_times(target, x, n):
     # Remove x from target, repeat n times
     for _ in range(n):
         target.remove(x)
+
+
+def is_valid(chosen, dice):
+    if len(chosen) == 0:
+        return False
+    for a in chosen:
+        if chosen.count(a) > dice.count(a):
+            return False
+        if a not in [1, 5] and chosen.count(a) % 3 != 0:
+            return False
+    return True

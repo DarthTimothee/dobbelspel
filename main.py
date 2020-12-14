@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from util import max_score, roll_dice, remove_times
+from util import max_score, roll_dice, remove_times, is_valid
 import strategies as strat
 
 
 def simulate(dice, prev_score=0, strategy=strat.choose_all):
     # print(f"{dice}, prev={prev_score}")
+    manual = strategy == strat.manual
 
     check = dice.copy()
     for a in [1, 2, 3, 4, 5, 6]:
@@ -22,46 +23,70 @@ def simulate(dice, prev_score=0, strategy=strat.choose_all):
     remaining = len(check)
     score = prev_score + max_score(dice)
 
+    # TODO: according to wikipedia (https://nl.wikipedia.org/wiki/5000en),
+    #  you get a bit more own choices here
     if remaining == 0:
+        if manual: print(f"you rolled {dice}, starting new round! current score: {score}")
         score += simulate(roll_dice(6), strategy=strategy)
         return 0 if score < 350 else score
     if remaining == 1:
+        if manual: print(f"you rolled {dice}, finished!")
         return 0 if score < 350 else score
     if remaining == len(dice):
+        if manual: print(f"you rolled {dice}, too bad!")
         return 0
 
     chosen_dice, remaining_dice = strategy(dice)
-    assert len(chosen_dice) + len(remaining_dice) == len(dice)
-    score = prev_score + max_score(chosen_dice)
+    if not is_valid(chosen_dice, dice) or \
+            len(chosen_dice) + len(remaining_dice) != len(dice):
+        print(f"ERROR: invalid choice: {chosen_dice}")
+        assert False
 
+    score = prev_score + max_score(chosen_dice)
+    # TODO: if remaining_dice is empty,
+    #  the player can choose whether to continue or not
+
+    if manual: print(f"going to next round, current score: {score}")
     final_score = simulate(roll_dice(len(remaining_dice)), score, strategy)
     return 0 if final_score < 350 else final_score
 
 
-N = 100000
-throws_all = np.zeros(N)
-throws_best = np.zeros(N)
-throws_alt = np.zeros(N)
-print(f"n = {N}")
-for i in range(N):
-    if i % 10000 == 0:
-        print(i)
-    throws_all[i] = simulate(roll_dice(6), strategy=strat.choose_all)
-    throws_best[i] = simulate(roll_dice(6), strategy=strat.choose_best)
-    throws_alt[i] = simulate(roll_dice(6), strategy=strat.choose_alt)
+def test_expectation(N):
+    throws = np.zeros((3, N))
 
-print("expectations:")
-print(f"ALL  = {np.mean(throws_all)}")
-print(f"BEST = {np.mean(throws_best)}")
-print(f"ALT  = {np.mean(throws_alt)}")
+    for i in range(N):
+        if i % 10000 == 0:
+            print(i)
 
-plt.figure()
-plt.xlim(0, 1000)
-plt.hist(throws_all, density=True, bins=100, color="b", alpha=0.5, label="choose all")
-plt.hist(throws_best, density=True, bins=100, color="r", alpha=0.5, label="choose only best")
-plt.hist(throws_alt, density=True, bins=100, color="g", alpha=0.5, label="choose alt")
+        dice = roll_dice(6)
+        throws[:, i] = np.array([
+            simulate(dice, strategy=strat.choose_all),
+            simulate(dice, strategy=strat.choose_best),
+            simulate(dice, strategy=strat.choose_alt)
+        ])
 
-plt.xlabel("reward")
-plt.ylabel("probability density")
-plt.legend()
-plt.show()
+    print(f"n = {N}")
+    print("expectations:")
+    print(f"ALL  = {np.mean(throws[0, :])}")
+    print(f"BEST = {np.mean(throws[1, :])}")
+    print(f"ALT  = {np.mean(throws[2, :])}")
+
+    plt.figure()
+    plt.xlim(0, 1000)
+    plt.hist(throws[0, :], density=True, bins=100, color="b", alpha=0.5, label="choose all")
+    plt.hist(throws[1, :], density=True, bins=100, color="r", alpha=0.5, label="choose only best")
+    plt.hist(throws[2, :], density=True, bins=100, color="g", alpha=0.5, label="choose alt")
+
+    plt.xlabel("reward")
+    plt.ylabel("probability density")
+    plt.legend()
+    plt.show()
+
+
+if __name__ == "__main__":
+    test_expectation(10**5)
+
+    while True:
+        print(f"final score: {simulate(roll_dice(6), strategy=strat.manual)}")
+        print(f"================\n")
+
