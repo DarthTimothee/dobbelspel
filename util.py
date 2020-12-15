@@ -18,6 +18,33 @@ def max_score(dice):
     return score + dice.count(1) * 100 + dice.count(5) * 50
 
 
+def legal_moves(dice):
+    moves = []
+
+    for a in [2, 3, 4, 6]:
+        if dice.count(a) == 6:
+            moves.append([a] * 6)
+        if dice.count(a) >= 3:
+            moves.append([a] * 3)
+
+    for a in dice:
+        if a in [1, 5]:
+            new_moves = moves.copy()
+            for move in moves:
+                new_move = [a, *move]
+                new_move.sort()
+                if new_move not in new_moves:
+                    new_moves.append(new_move)
+            moves = new_moves
+            if [a] not in moves:
+                moves.append([a])
+
+    if sorted(dice) == [1, 2, 3, 4, 5, 6]:
+        moves.append(dice)
+
+    return moves
+
+
 def roll_dice(n):
     return [random.randint(1, 6) for _ in range(n)]
 
@@ -31,6 +58,8 @@ def remove_times(target, x, n):
 def is_valid(chosen, dice):
     if len(chosen) == 0:
         return False
+    if sorted(chosen) == [1, 2, 3, 4, 5, 6]:
+        return True
     for a in chosen:
         if chosen.count(a) > dice.count(a):
             return False
