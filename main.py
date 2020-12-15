@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from qlearner import Qdict
-from util import max_score, roll_dice, remove_times, is_valid
+from util import *
 import strategies as strat
 
 
@@ -144,7 +144,7 @@ def test_expectation(N):
 
 
 if __name__ == "__main__":
-    test_expectation(10 ** 6)
+    test_expectation(10 ** 5)
 
     # while True:
     #     print(f"final score: {simulate(roll_dice(6), strategy=strat.manual)}")

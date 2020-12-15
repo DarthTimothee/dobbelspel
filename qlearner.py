@@ -5,9 +5,11 @@ learning_rate = 0.1
 
 
 class QSApairs():
-    def __init__(self, state):
-        self.prior_reward = state[0]
-        self.prior_dice = list(state)[1:]
+    def __init__(self, score, dice):
+        self.prior_reward = score
+        self.prior_dice = dice
+        # TODO: share same legal_moves dict if they have the exact same
+        #  set of legal moves
         self.legal_moves = {tuple(action): 0 for action in legal_moves(self.prior_dice)}
 
     def learn(self, action, reward, discount, next_reward):
@@ -46,12 +48,14 @@ class Qdict(dict):
     discount = 0.9
 
     def __missing__(self, dice_key):
-        ret = self[dice_key] = QSApairs(dice_key)  # Exclude score
+        score = min(dice_key[0], 350)
+        dice = sorted(list(dice_key)[1:])
+        key = tuple([score, *dice])
+        ret = self[key] = QSApairs(score, dice)
         return ret
 
     def learn(self, prior_reward, prior_dice, action, reward, discount, next_reward):
-        key = tuple([prior_reward, *sorted(prior_dice)])
-        self[key].learn(action, reward, discount, next_reward)
+        return self[keyify(prior_reward, prior_dice)].learn(action, reward, discount, next_reward)
 
     def strategy_epsilon_greedy(self, prev_score, dice):
         return self[keyify(prev_score, dice)].get_epsilon_greedy()
@@ -71,4 +75,4 @@ class Qdict(dict):
 
 
 def keyify(score, dice):
-    return tuple([score, *sorted(dice)])
+    return tuple([min(score, 350), *sorted(dice)])
