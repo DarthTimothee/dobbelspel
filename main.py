@@ -14,7 +14,7 @@ for i in [1, 2, 3, 4, 5, 6]:
     estimated_next_reward.append(m)
 
 
-def simulate(dice, prev_score=0, strategy=strat.choose_all):
+def simulate(dice, prev_score=0, strategy=strat.choose_all, learn=None):
     manual = strategy == strat.manual
 
     check = dice.copy()
@@ -56,7 +56,8 @@ def simulate(dice, prev_score=0, strategy=strat.choose_all):
     remaining_dice = len(dice) - len(chosen_dice)
     next_reward = estimated_next_reward[remaining_dice]
 
-    Q.learn(prev_score, sorted(dice), sorted(chosen_dice), score, discount=0.9, next_reward=next_reward)
+    if learn:
+        learn(prev_score, sorted(dice), sorted(chosen_dice), score, discount=0.9, next_reward=next_reward)
 
     if manual:
         print(f"going to next round, current score: {score}")
@@ -67,29 +68,14 @@ def simulate(dice, prev_score=0, strategy=strat.choose_all):
 
 def test_expectation(N):
 
-    # M = 250
-    # groupsize = 250
-    # tmp = []
-    # train = []
-    # print(f"Training Q table...")
-    # for i in range(M):
-    #     if i % 10000 == 0 and i > 0:
-    #         print(i)
-    #     if i % groupsize == 0 and i > 0:
-    #         train.append(np.mean(tmp))
-    #         tmp = []
-    #
-    #     dice = roll_dice(6)
-    #     simulate(dice.copy(), strategy=Q.strategy_epsilon_greedy)
-    #     r = simulate(dice, strategy=Q.strategy_opt)
-    #     tmp.append(r)
-    #
-    # print(f"Done training!")
-    #
-    # plt.figure()
-    # plt.plot(train, label="average over 50 rounds")
-    # plt.legend()
-    # plt.show()
+    M = 10**6
+    print(f"Training Q table...")
+    for i in range(M):
+        if i % 10000 == 0 and i > 0:
+            print(i)
+        dice = roll_dice(6)
+        simulate(dice, strategy=Q.strategy_random)
+
 
     print(f"Evaluating...")
     throws = np.zeros((5, N))
@@ -100,7 +86,7 @@ def test_expectation(N):
         dice = roll_dice(6)
 
         throws[:, i] = np.array([
-            simulate(dice, strategy=Q.strategy_opt),
+            simulate(dice, strategy=Q.strategy_opt, learn=Q.learn),
             simulate(dice, strategy=strat.choose_all),
             simulate(dice, strategy=strat.choose_best),
             simulate(dice, strategy=strat.choose_alt),
